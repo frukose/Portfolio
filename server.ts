@@ -1,10 +1,11 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  // On Render and other cloud platforms, bind to the system-assigned PORT environment variable.
+  // If not defined (such as in AI Studio workspace), fall back to port 3000.
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   // Health check API endpoint
   app.get("/api/health", (req, res) => {
@@ -13,6 +14,7 @@ async function startServer() {
 
   // Setup Vite middleware in development or serve static files in production
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
